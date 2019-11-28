@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 
-const controller = require("../controllers/PokemonsController")
+const controller = require("../controllers/TreinadoresController")
+
 
 router.get('', controller.getAll)
-router.post ('', controller.add)
-router.patch('/:id', controller.treinarNivel)
+router.post('', controller.add)
 router.get('/:id', controller.getById)
 router.patch('/:id', controller.update)
 router.delete('/:id', controller.remove)
-router.patch('/treinar/:id', controller.treinar)
+router.post('/:treinadorId/pokemons', controller.addPokemon)
+router.patch('/:treinadorId/pokemons/:pokemonId/treinar', controller.treinarPokemon)
 
 module.exports = router
