@@ -3,6 +3,10 @@ const pokemonsModel = require('../models/PokemonsSchema')
 
 connect()
 
+
+
+    
+
 const getAll = (request, response) => {
   pokemonsModel.find((error, pokemons) => {
     if (error) {
@@ -40,6 +44,34 @@ const add = (request, response) => {
     return response.status(201).send(novoPokemon)
   })
 }
+  const treinarNivel = (request, response) => {
+  const id = request.params.id
+  const dataInicio = new Date ("2019-11-25T19:25:04.861Z")
+  const dataFim = new Date ("2019-11-25T19:25:04.861Z")
+  const options = {new : true}
+  const nivel=  Math.abs(new Date(dataInicio) - new Date(dataFim)) / 3600000 / 4
+
+  
+  
+
+  pokemonsModel.findByIdAndUpdate(
+    id,
+    {nivel: nivel},
+    options,
+    (error, sucess) => {
+      if (error){
+        return response.SendStatus(500)
+      }
+      if (sucess){
+        return response.SendStatus(201)
+      }
+    return response.SendStatus(404)
+    }
+  )
+  }
+  
+
+
 
 const remove = (request, response) => {
   const id = request.params.id
@@ -85,5 +117,6 @@ module.exports = {
   getById,
   add,
   remove,
-  update
+  update,
+  treinarNivel
 }
