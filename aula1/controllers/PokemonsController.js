@@ -1,13 +1,9 @@
 const { connect } = require('../models/Repository')
 const pokemonsModel = require('../models/PokemonsSchema')
 
+
 connect()
 
-const calcularNivel = (inicio, fim, nivelAtual) => {
-  const novoNivel = (Math.abs(new Date(inicio) - new Date(fim)) / 3600000) / 4
-
-  return novoNivel + nivelAtual;
-}
 
 const getAll = (request, response) => {
   pokemonsModel.find((error, pokemons) => {

@@ -1,6 +1,7 @@
 const { connect } = require('../models/Repository')
 const treinadoresModel = require('../models/TreinadoresSchema')
 const { pokemonsModel } = require('../models/PokemonsSchema')
+const bcript = require('../bcript')
 
 connect()
 
@@ -22,7 +23,7 @@ const getAll = (request, response) => {
 
 const getById = (request, response) => {
   const id = request.params.id
-
+  
   return treinadoresModel.findById(id, (error, treinador) => {
     if (error) {
       return response.status(500).send(error)
@@ -37,6 +38,8 @@ const getById = (request, response) => {
 }
 
 const add = (request, response) => {
+  const senhaCriptografada = bcript.hashSync(request.body.senha)
+  request.body.senha = senhaCriptografada //pega a senha informada, transforma em hash e muda a senha informada para o hash criado
   const novoTreinador = new treinadoresModel(request.body)
 
   novoTreinador.save((error) => {
@@ -92,7 +95,7 @@ const addPokemon = async (request, response) => {
   const pokemon = request.body
   const novoPokemon = new pokemonsModel(pokemon)
   const treinador = await treinadoresModel.findById(treinadorId)
-  console.log(treinador, 'TAKI')
+  
   treinador.pokemons.push(novoPokemon)
   treinador.save((error) => {
     if (error) {
@@ -122,6 +125,51 @@ const treinarPokemon = async (request, response) => {
   })
 }
 
+const getPokemonById = async (request, response) => {
+  const treinadorId= request.body.treinadorId
+  const pokemonId = request.body.pokemonId
+  const treinador = await treinadoresModel.findById(treinadorId)
+  const pokemon = treinador.pokemons.find((pokemon) => {
+    return pokemonId == pokemon._id
+  })
+
+  if( pokemon) {
+    return response.status(200).send(pokemon)
+  }
+    return response.status(404).send('Pokemon não encontrado')
+}
+
+const getAllPokemons = async (request, response) => {
+  const treinadorId = request.params.id
+  const treinador = await treinadoresModel.findById(id)
+
+  if (treinador) {
+    return response.status(200).send(treinador.pokemon)
+  }
+
+    return response.status(404).send("Treinador não encontrado")
+}
+
+const updatePokemon = (request, response) => {
+  const treinadorId = request.params.treinadorId
+  const pokemonId = request.params.pokemonId
+ const pokemon = request.body
+  
+  treinadoresModel.findOneAndUpdate(
+    {_id: treinadorId, 'pokemons.$._id': pokemonId},
+    pokemon,
+    {new: true},
+    (error, treinador) => {
+      if (error) {
+        return response.status(500).send(error)
+      }
+
+      return response.status(200).send(treinador)
+
+    }
+  )
+}
+
 module.exports = {
   getAll,
   getById,
@@ -129,5 +177,7 @@ module.exports = {
   remove,
   update,
   addPokemon,
-  treinarPokemon
+  treinarPokemon,
+  getPokemonById,
+  updatePokemon
 }
