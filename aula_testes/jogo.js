@@ -14,4 +14,4 @@ const jogo = (numeroGerado, resposta) => {
     }
 }
 
-module.exports = jogo 
+module.exports = jogo
