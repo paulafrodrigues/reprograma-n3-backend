@@ -60,11 +60,15 @@ const login = async (request, response) => {
   const treinador = await treinadoresModel.findOne({ email })
   const senhaValida = bcrypt.compareSync(senha, treinador.senha)
 
-  if (senhaValida) {
-    return response.status(200).send('Usuário logado')
+  if (!treinador) {
+    return response.status(401).send('E-mail inválido!')
+  }
+      if (senhaValida) {
+
+    return response.status(200).send('Usuário logado!')
   }
 
-  return response.status(401).send('Usuário ou senha inválidos')
+  return response.status(401).send('Senha inválidos!')
 }
 
 const remove = (request, response) => {
@@ -89,16 +93,21 @@ const update = (request, response) => {
   const options = { new: true }
 
   treinadoresModel.findByIdAndUpdate(
-    id,
-    treinadorUpdate,
-    options,
+    { _id: id },
+    { $set:
+        {
+          'treinadoresModel.nome':treinadorUpdate.nome,
+          'treinadoresModel.email':treinadorUpdate.email,
+          'treinadoresModel.foto': treinadorUpdate.foto
+        },
+    {new: true}
     (error, treinador) => {
       if (error) {
         return response.status(500).send(error)
       }
 
       if (treinador) {
-        return response.status(200).send(treinador)
+        return response.status(200).send({new: true})
       }
 
       return response.status(404).send('Treinador não encontrado.')
@@ -201,5 +210,6 @@ module.exports = {
   treinarPokemon,
   getPokemonById,
   updatePokemon,
-  login
+  login,
+  getAllPokemons
 }
