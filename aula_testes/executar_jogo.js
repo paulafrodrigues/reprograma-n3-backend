@@ -1,6 +1,7 @@
 const readline = require('readline')
 const jogo = require('./jogo')
-const numeroGerado = 50
+const numeroGerado = parseInt(Math.random()*(100 -1) +1)
+console.log(numeroGerado)
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
