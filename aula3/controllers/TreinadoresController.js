@@ -1,7 +1,7 @@
 const { connect } = require('../models/Repository')
 const treinadoresModel = require('../models/TreinadoresSchema')
 const { pokemonsModel } = require('../models/PokemonsSchema')
-const bcript = require('../bcript')
+const bcrypt = require('bcryptjs')
 
 connect()
 
@@ -23,7 +23,7 @@ const getAll = (request, response) => {
 
 const getById = (request, response) => {
   const id = request.params.id
-  
+
   return treinadoresModel.findById(id, (error, treinador) => {
     if (error) {
       return response.status(500).send(error)
@@ -38,8 +38,11 @@ const getById = (request, response) => {
 }
 
 const add = (request, response) => {
-  const senhaCriptografada = bcript.hashSync(request.body.senha)
-  request.body.senha = senhaCriptografada //pega a senha informada, transforma em hash e muda a senha informada para o hash criado
+  if (!request.body.senha) {
+    return response.status(400).send('bota a senha aí')
+  }
+  const senhaCriptografada = bcrypt.hashSync(request.body.senha)
+  request.body.senha = senhaCriptografada
   const novoTreinador = new treinadoresModel(request.body)
 
   novoTreinador.save((error) => {
@@ -49,6 +52,19 @@ const add = (request, response) => {
 
     return response.status(201).send(novoTreinador)
   })
+}
+
+const login = async (request, response) => {
+  const email = request.body.email
+  const senha = request.body.senha
+  const treinador = await treinadoresModel.findOne({ email })
+  const senhaValida = bcrypt.compareSync(senha, treinador.senha)
+
+  if (senhaValida) {
+    return response.status(200).send('Usuário logado')
+  }
+
+  return response.status(401).send('Usuário ou senha inválidos')
 }
 
 const remove = (request, response) => {
@@ -78,7 +94,7 @@ const update = (request, response) => {
     options,
     (error, treinador) => {
       if (error) {
-        return response.status(500).sned(error)
+        return response.status(500).send(error)
       }
 
       if (treinador) {
@@ -95,7 +111,7 @@ const addPokemon = async (request, response) => {
   const pokemon = request.body
   const novoPokemon = new pokemonsModel(pokemon)
   const treinador = await treinadoresModel.findById(treinadorId)
-  
+  console.log(treinador, 'TAKI')
   treinador.pokemons.push(novoPokemon)
   treinador.save((error) => {
     if (error) {
@@ -145,10 +161,10 @@ const getAllPokemons = async (request, response) => {
   const treinador = await treinadoresModel.findById(id)
 
   if (treinador) {
-    return response.status(200).send(treinador.pokemon)
+    return response.status(200).send(treinador.pokemons)
   }
 
-    return response.status(404).send("Treinador não encontrado")
+  return response.status(404).send('Treinador não encontrado.')
 }
 
 const updatePokemon = (request, response) => {
@@ -184,5 +200,6 @@ module.exports = {
   addPokemon,
   treinarPokemon,
   getPokemonById,
-  updatePokemon
+  updatePokemon,
+  login
 }
