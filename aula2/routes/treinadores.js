@@ -11,7 +11,12 @@ router.patch('/:id', controller.update)
 router.delete('/:id', controller.remove)
 router.post('/:treinadorId/pokemons', controller.addPokemon)
 router.patch('/:treinadorId/pokemons/:pokemonId/treinar', controller.treinarPokemon)
+
+router.get('')
+
 router.get('/:treinadorId/pokemons/:pokemonId', controller.getPokemonById)
 router.patch('/:treinadorId/pokemons/:pokemonId', controller.updatePokemon)
+
+
 
 module.exports = router
