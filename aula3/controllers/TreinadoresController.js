@@ -109,6 +109,27 @@ const update = (request, response) => {
 }
 
 const addPokemon = async (request, response) => {
+  const authHeader = request.get('authorization')
+  let autenticado = false
+
+  if (!authHeader) {
+    return response.status(401).send('Você precisa fazer login!')
+  }
+
+  const token = authHeader.split(' ')[1]
+
+  jwt.verify(token, CHAVE_PRIVADA, (error, decoded) => {
+    if (error) {
+      autenticado = false
+    } else {
+      autenticado = true
+    }
+  })
+
+  if (!autenticado) {
+    return response.status(403).send('Acesso negado.')
+  }
+
   const treinadorId = request.params.treinadorId
   const pokemon = request.body
   const options = { new: true }

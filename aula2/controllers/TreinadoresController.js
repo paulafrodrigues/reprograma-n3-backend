@@ -12,6 +12,14 @@ const calcularNivel = (inicio, fim, nivelAtual) => {
 }
 
 const getAll = (request, response) => {
+  const token = request.get('authorization') 
+  const decode = jwt.verify(token, CHAVE_PUBLICA, (error, decode) => {
+    if (error) {
+      autenticado = false
+    } else {
+      autenticado = true
+    }
+  })
   treinadoresModel.find((error, treinadores) => {
     if (error) {
       return response.status(500).send(error)
@@ -49,6 +57,24 @@ const add = (request, response) => {
 
     return response.status(201).send(novoTreinador)
   })
+}
+
+const login = async (request, response) => {
+  const email = request.body.email
+  const senha = request.body.senha
+  const treinador = await treinadoresModel.findOne({ email })
+  const senhaValida = bcrypt.compareSync(senha, treinador.senha)
+
+  if (senhaValida) {
+    const token = jwt.sign(
+      { id: treinador.id, email: treinador.email }, // isso é o payload, heade não é necessário
+      PRIVATE_KEY // serve para gerar a criptografia do token
+    )
+
+    return response.status(200).send({ token })
+  }
+
+  return response.status(401).send('Usuário ou senha inválidos')
 }
 
 const remove = (request, response) => {
@@ -178,7 +204,9 @@ const updatePokemon = (request, response) => {
 module.exports = {
   getAll,
   getById,
+  getAllPokemons,
   add,
+  login,
   remove,
   update,
   addPokemon,
